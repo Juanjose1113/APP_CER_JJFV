@@ -1,14 +1,8 @@
-"""
-BIBLIOTECAS Y CONFIGURACIONES PREVIAS
-"""
 from flask import Flask, render_template, redirect, request, url_for, session, flash #Flask para crear app flask, render_template para crear plantillas HTML, redirect para redireccionar, request para solicitudes, url_for para construir urls, session para sesiones de usuario y flash para mensajes
 from crypt import methods #El módulo crypt de Python sirve para encriptar contraseñas
 from threading import local #El módulo threading tiene la clase local, que sirve para poder trabajar varios hilos a la vez con el mismo dato
 from typing import Collection #La clase Collection de typing sirve para trabajar con listas, conjuntos o diccionarios, iteracciones y comprobaciones
 from datetime import datetime #Fechas y horas
-
-from bs4 import BeautifulSoup #Para extraccion de HTML
-import cloudscraper #Sortear medidas de seguridad
 
 import os #Operaciones del sistema
 import requests #Solicitudes HTTP
@@ -26,14 +20,8 @@ from pymongo.mongo_client import MongoClient
 app = Flask(__name__)
 app.secret_key = "ayush"
 
-#URL de la que se sacan los datos del oro
+#URL de la que se sacan los datos del oro y encabezado para simular que viene de un navegador y no ser rechadado
 URL = "https://es.investing.com/commodities/gold"
-
-#Encabezados para simular un navegador
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-}
-
 html_guardado = 'web_oro_ejemplo.html' #Por si deniega servicio
 
 # Configurar la conexión a Elasticsearch (equipo local)
@@ -50,9 +38,8 @@ try:
 except Exception as e:
     print(e)
 
-"""
-FUNCIÓN PRINCIPAL PAGINA WEB
-"""
+
+#FUNCIÓN PRINCIPAL PAGINA WEB
 @app.route('/')
 def home():
   #Consulta para obtener el valor más reciente
@@ -63,7 +50,7 @@ def home():
         "size": 1,  # Obtener solo un valor (el más reciente)
         "sort": [
             {
-                "@timestamp": {
+                "_id": {
                     "order": "desc"  # Ordenar en orden descendente
                 }
             }
@@ -82,110 +69,9 @@ def home():
     # Si estás logeado, mostrar otra página con variables adicionales
     return render_template("homepageregister.html", value=session["username"], exchangevalue=precio_oro_1, localaverageshow="hidden", localaverage=0, remoteaverageshow="hidden", remoteaverage=0, timeslocal=0, timesremote=0, umbralhistoricoshow='hidden', umbralhistorico=0)
 
-
-"""
-INSERCIÓN DE DATOS EN LAS BBDD
-"""
-def readingdata():
-    while True:
-        element = None
-        #Bucle para que busque hasta que encuentre
-        while element is None:
-           # Crear un objeto de scraper de nube
-           scraper = cloudscraper.create_scraper()
-
-           # Hacer la solicitud a la página web usando cloudscraper
-           response = scraper.get(URL)
-
-           #Verificamos si la solicitud fue exitosa
-           if response.status_code == 200:
-               #Obtener el contenido HTML de la respuesta
-               content = BeautifulSoup(response.content, "html.parser")
-               print("Contenido HTML obtenido correctamente.")
-           else:
-               print("Error al obtener el contenido HTML. Código de estado:", response.status_code)
-               print("Leyendo contenido HTML guardado en web_oro_ejemplo.html")
-               with open(html_guardado, 'r', encoding='utf-8') as archivo_html:
-                    #Leer el contenido del archivo en una variable
-                    content = archivo_html.read()
-
-           # Encontrar el elemento usando una expresión regular y BeautifulSoup
-           pattern = re.compile(r'1\.?\d{1,3},\d{2}')  # Expresión regular para el número en el formato 1.000,00
-           element = content.find("div", class_=re.compile("text-5xl/9"), string=pattern)
-           
-           if element is None:
-            print("Elemento no encontrado en el HTML. Reintentando... (", element, ")")
-
-        print("Valor extraido del HTML: ", element, "(", type(element), ")")
-        
-        element_text = element.text.strip()  # Obtén el texto del objeto
-        
-        #Extraemos valor en formato string
-        res_str = element_text.replace(".", "").replace(",", ".")  # Reemplazar '.' con '' y ',' con '.' para obtener un número válido
-
-        res_str = float(res_str) #Convierte a float
-        
-        print("Valor a guardar en BBDD: ", res_str, "(", type(res_str), ")")
-        
-        #Obtener la fecha y hora actual
-        date = datetime.now()
-        date = date.isoformat()
-
-        # Creamos el documento nuevo
-        document = {
-            "value": res_str,
-            "@timestamp": date  #El campo @timestamp es especial para Elasticsearch
-        }
-
-        #Insertar los datos en Elasticsearch
-        es.index(index='precio_oro_1', body=document)
-        print("Guardado en BBDD Local")
-        
-        #Insertar los datos en MongoDB
-        collection = client['BBDD_remota']['precio_oro_1']  #Obtener la colección precio_oro_1
-        collection.insert_one(document)  #Insertar el documento
-        print("Guardado en BBDD Remota")
-        time.sleep(120)
-
-
-"""
-PAGINA WEB DE REGISTRO
-"""
-@app.route('/register', methods=['GET'])
-def register():
-    return render_template("register.html")
-
-#Lectura de datos introducidos en registro
-@app.route('/register', methods=['POST'])
-def registersend():
-    username = request.form['username']
-    email = request.form['email']
-    password = hashlib.sha256(request.form['password'].encode("utf-8")).hexdigest()
-
-    #Verificar ya está registrado en Elasticsearch
-    if es.exists(index='usuarios', id=username):
-        flash("El usuario ya está registrado")
-        return render_template("register.html")
-
-    #Almacenar los datos en Elasticsearch
-    usuario = {
-        "username": username,
-        "email": email,
-        "password": password,
-        "media_info": 0,
-        "media_info_remota": 0,
-        "type": "_doc"
-    }
-
-    #Insertar el valor en Elasticsearch
-    es.index(index='usuarios', body=usuario)
-
-    return redirect(url_for('login'))  #Redirigir a la página de inicio de sesión después del registro
-
     
-"""
-PAGINA WEB DE LOGIN
-"""
+
+#PAGINA WEB DE LOGIN
 @app.route('/login', methods=['GET'])
 def login():
     return render_template("loginpage.html")
@@ -219,9 +105,43 @@ def loginsend():
         return render_template("loginpage.html")
 
 
-"""
-CIERRE DE SESIÓN
-"""
+
+#PAGINA WEB DE REGISTRO
+@app.route('/register', methods=['GET'])
+def register():
+    return render_template("register.html")
+
+#Lectura de datos introducidos en registro
+@app.route('/register', methods=['POST'])
+def registersend():
+    username = request.form['username']
+    email = request.form['email']
+    password = hashlib.sha256(request.form['password'].encode("utf-8")).hexdigest()
+
+    #Verificar ya está registrado en Elasticsearch
+    if es.exists(index='usuarios', id=username):
+        flash("El usuario ya está registrado")
+        return render_template("register.html")
+
+    #Almacenar los datos en Elasticsearch
+    usuario = {
+        "username": username,
+        "email": email,
+        "password": password,
+        "media_info": 0,
+        "media_info_remota": 0,
+        "type": "_doc"
+    }
+
+    #Insertar el valor en Elasticsearch
+    es.index(index='usuarios', body=usuario)
+
+    return redirect(url_for('login'))  #Redirigir a la página de inicio de sesión después del registro
+
+
+
+
+#CIERRE DE SESIÓN
 @app.route('/logout')
 def logout():
     if session.get('logged_in'):
@@ -230,9 +150,8 @@ def logout():
 
 
 
-"""
-CALCULAR MEDIA BBDD LOCAL
-"""
+
+#CALCULAR MEDIA BBDD LOCAL
 @app.route('/localaverage')
 def localaverage():
     #Consultar los valores en el índice precio_oro
@@ -240,8 +159,6 @@ def localaverage():
         
     #Obtener todos los valores de los documentos
     valores = [hit['_source']['value'] for hit in resultados['hits']['hits']]
-    
-    print(valores)
     
     #Calcular la media de los valores
     media = sum(valores) / len(valores) if len(valores) > 0 else 0
@@ -272,9 +189,8 @@ def localaverage():
     return redirect('/resultados?media={}&solicitudes={}'.format(media, numero_medias_actualizado))
 
 
-"""
-CALCULAR MEDIA REMOTA
-"""
+
+#CALCULAR MEDIA REMOTA
 @app.route('/remoteaverage')
 def remoteaverage():
     uri = "mongodb+srv://BBDD_Remota:12345@p1-cer.l6ixjd1.mongodb.net/?retryWrites=true&w=majority"
@@ -327,9 +243,8 @@ def remoteaverage():
     return redirect('/resultados?media={}&solicitudes={}'.format(media, numero_medias_actualizado))
 
 
-"""
-VISUALIZACIÓN DE RESULTADOS
-"""
+
+#VISUALIZACIÓN DE RESULTADOS
 @app.route('/resultados')
 def resultados():
     media = request.args.get('media')
@@ -338,17 +253,15 @@ def resultados():
     return render_template('resultados.html', value=session["username"], media=media, solicitudes=solicitudes)
 
 
-"""
-OBTENCIÓN DEL GRÁFICO
-"""
+
+#OBTENCIÓN DEL GRÁFICO
 @app.route('/remotegraphic', methods=['GET'])
 def graphic():
     return render_template("graphic.html", value=session["username"])
 
 
-"""
-UMBRAL HISTORICO
-"""
+
+#UMBRAL HISTORICO
 @app.route('/umbralhistorico', methods=['POST'])
 def umbralhistorico():
     result = ''
@@ -369,9 +282,59 @@ def umbralhistorico():
                                timeslocal=0, timesremote=0, umbralhistoricoshow='', umbralhistorico=result)
 
 
-"""
-MANEJO DE HILOS
-"""
+
+#INSERCCIÓN DE DATOS EN LAS BBDD
+def readingdata():
+    while True:
+        #Solicitud GET a la URL
+        response = requests.get(URL)
+
+        #Verificamos si la solicitud fue exitosa
+        if response.status_code == 200:
+            #Obtener el contenido HTML de la respuesta
+            content = response.text
+            print("Contenido HTML obtenido correctamente.")
+        else:
+            print("Error al obtener el contenido HTML. Código de estado:", response.status_code)
+            print("Leyendo contenido HTML guardado en web_oro_ejemplo.html")
+            with open(html_guardado, 'r', encoding='utf-8') as archivo_html:
+                 #Leer el contenido del archivo en una variable
+                 content = archivo_html.read()
+
+        #Generar el regex para leer el valor del euro
+        searchregex = re.compile(r"text-5xl/9 font-bold md:text-\[42px\] md:leading-\[60px\] text-\[#232526\]\">([^,]+,[^<]+)")
+        
+        #Buscar la coincidencia de la string que buscamos 
+        coincidencia = searchregex.search(content)
+        
+        #Extraemos valor en formato string
+        res_str = coincidencia.group(1)
+        print("Valor extraido del HTML: " +res_str)
+        #Modificar valor para guardarlo en BBDD
+        res_str = re.sub(r'\.', '', res_str)  #Quitar punto de los miles
+        res_str = res_str.replace(',', '.')  #Reemplazar coma decimal por punto
+        res_str = float(res_str) #Convierte a float
+        
+        #Obtener la fecha y hora actual
+        #date = datetime.today().replace(microsecond=0, second=0)
+        date = datetime.now()
+        date = date.isoformat()
+
+        # Pasar esa cadena a flotante y enviarla a Elasticsearch
+        document = {
+            "value": res_str,
+            "@timestamp": date  #El campo @timestamp es especial para Elasticsearch
+        }
+
+        #Insertar los datos en Elasticsearch
+        es.index(index='precio_oro_1', body=document)
+        
+        #Insertar los datos en MongoDB
+        collection = client['BBDD_remota']['precio_oro_1']  #Obtener la colección precio_oro_1
+        collection.insert_one(document)  #Insertar el documento
+
+        time.sleep(120)
+
 if __name__ == "__main__":
     hilo1 = threading.Thread(target=readingdata)  # inicializar el hilo1
     hilo1.start()  #Iniciar el hilo 1
