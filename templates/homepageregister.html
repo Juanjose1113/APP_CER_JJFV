@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Practica 1 CER</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+
+<body>
+
+    <div class="navbar">
+        <h3 class="welcome">¡Hola {{value}}!</h3>
+        <a href="/logout">Logout</a>
+    </div>
+    <div class="container">
+        <h1 class="headertitle">Practica 1 CER Juan Jose Fernandez</h1>
+        <h2 class="exchangevalue">{{exchangevalue}} USD/kg de Oro</h2>
+        <p class="textaverage" {{umbralhistoricoshow}}> Ultimos 5 valores que ha superado el umbral: {{umbralhistorico}}</p>
+        <div class="buttonmedia">
+            <input type="button" onclick="location.href='/localaverage'" style="margin: 1rem 10rem;"
+                value="Media Base de datos Local">
+            <input type="button" onclick="location.href='/remoteaverage'" style="margin: 1rem 10rem;"
+                value="Media Base de datos Remota">
+        </div>
+        <div class="buttonmedia" style="padding-top: 1rem;">
+            <input type="button" onclick="location.href='/remotegraphic'"
+                style="margin: 1rem 10rem; margin: auto; width: 40%;" value="Ver Grafica">
+        </div>
+        <div class="buttonmedia">
+            <div id="login-form-wrap">
+                <form action='/umbralhistorico' id="login-form" method="POST">
+                    <p>
+                        <input type="text" id="umbralhistorico" name="umbralhistorico" placeholder="Umbral historico"
+                            required><i class="validation"><span></span><span></span></i>
+                    </p>
+                    <p>
+                        <input type="submit" value="Umbral Historico">
+                    </p>
+                </form>
+            </div>
+            <div id="login-form-wrap">
+                <form action='/umbralactual' id="login-form" method="POST">
+                    <p>
+                        <input type="text" id="umbralactual" name="umbralactual" placeholder="Umbral Actual"
+                            required><i class="validation"><span></span><span></span></i>
+                    </p>
+                    <p>
+                        <input type="submit" value="Umbral Actual">
+                    </p>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+
+
+

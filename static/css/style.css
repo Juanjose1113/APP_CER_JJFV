@@ -1,0 +1,238 @@
+body {
+    background-color: #B5FFC4;
+    font-size: 2.0rem;
+    font-family: "Arial", sans-serif;
+    color: #000000;
+    height: 100%;
+    width: 100%;
+}
+
+#loginpages {
+    background-color: #00800E;
+    color: #FFFFFF;
+}
+
+#login-box {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.welcome {
+    padding-right: 2rem;
+}
+
+.headertitle {
+    padding-top: 4rem;
+}
+
+.exchangevalue {
+    color: black;
+}
+
+.buttonmedia {
+    display: flex;
+}
+
+h2 {
+    font-weight: 300;
+    text-align: center;
+}
+
+p {
+    position: relative;
+}
+
+h1 {
+    text-align: center;
+    color: black;
+}
+
+a,
+a:link,
+a:visited,
+a:active {
+    color: #4CE23D;
+    transition: all 0.2s ease;
+}
+
+a:focus,
+a:hover,
+a:link:focus,
+a:link:hover,
+a:visited:focus,
+a:visited:hover,
+a:active:focus,
+a:active:hover {
+    color: #C4D904;
+    transition: all 0.2s ease;
+}
+
+#login-form-wrap {
+    background-color: #B5FFC4;
+    width: 35%;
+    margin: 30px auto;
+    text-align: center;
+    padding: 20px 0 0 0;
+    border-radius: 4px;
+    box-shadow: 0px 30px 50px 0px rgba(0, 0, 0, 0.2);
+}
+
+input {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    outline: none;
+    height: 60px;
+    line-height: 60px;
+    border-radius: 4px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    width: 100%;
+    padding: 0 0 0 10px;
+    margin: 0;
+    color: #8a8b8e;
+    border: 1px solid #C1CAC0;
+    font-style: normal;
+    font-size: 16px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    position: relative;
+    display: inline-block;
+    background: none;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #C8FC11;
+}
+
+input[type="text"]:focus:invalid,
+input[type="email"]:focus:invalid,
+input[type="password"]:focus:invalid {
+    color: #BBCC1E;
+    border-color: #BBCC1E;
+}
+
+input[type="text"]:valid~.validation,
+input[type="email"]:valid~.validation,
+input[type="password"]:valid~.validation {
+    display: block;
+    border-color: #0C0;
+}
+
+input[type="text"]:valid~.validation span,
+input[type="email"]:valid~.validation span,
+input[type="password"]:valid~.validation span {
+    background: #0C0;
+    position: absolute;
+    border-radius: 6px;
+}
+
+input[type="text"]:valid~.validation span:first-child,
+input[type="email"]:valid~.validation span:first-child,
+input[type="password"]:valid~.validation span:first-child {
+    top: 30px;
+    left: 14px;
+    width: 20px;
+    height: 3px;
+    transform: rotate(-45deg);
+}
+
+input[type="text"]:valid~.validation span:last-child,
+input[type="email"]:valid~.validation span:last-child,
+input[type="password"]:valid~.validation span:last-child {
+    top: 35px;
+    left: 8px;
+    width: 11px;
+    height: 3px;
+    transform: rotate(45deg);
+}
+
+.validation {
+    display: none;
+    position: absolute;
+    content: " ";
+    height: 60px;
+    width: 30px;
+    right: 15px;
+    top: 0px;
+}
+
+input[type="submit"],
+input[type="button"] {
+    border: none;
+    display: block;
+    background-color: #D90429;
+    color: #EDF2F4;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 18px;
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    text-align: center;
+}
+
+input[type="submit"]:hover,
+input[type="button"]:hover {
+    background-color: #9A031E;
+}
+
+.textaverage {
+    color: black;
+    font-size: 2rem;
+    text-align: center;
+}
+
+#create-account-wrap {
+    background-color: #eedf1f;
+    color: #8a8b8e;
+    font-size: 14px;
+    width: 100%;
+    padding: 10px 0;
+    border-radius: 0 0 4px 4px;
+}
+
+.navbar {
+    overflow: hidden;
+    background-color: #D90429;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    box-shadow: 0px 30px 50px 0px rgba(0, 0, 0, 0.2);
+    height: 5rem;
+    align-items: center;
+}
+
+.navbar a {
+    float: left;
+    display: block;
+    color: #EDF2F4;
+    text-align: center;
+    padding: 15px 18px;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.navbar a:hover {
+    color: #2B2D42;
+}
+
+.container {
+    padding: 18px;
+    margin-top: 35px;
+    height: 2000px;
+}
+

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Resultados</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+    <link rel="stylesheet" href="../static/css/style.css">
+</head>
+
+<body>
+
+    <div class="navbar">
+        <h3 class="welcome">¡Hola {{value}}!</h3>
+        <a href="/logout">Logout</a>
+    </div>
+    <div class="container">
+        <h1 class="headertitle">Resultados</h1>
+        <p>Media de la BBDD seleccionada: {{media}} USD/kg de Oro</p>
+        <p>Solicitudes de media a BBDD seleccionada: {{solicitudes}} veces</p>
+
+        <div class="buttonmedia">
+            <input type="button" onclick="location.href='/'" style="margin: 1rem 10rem;"
+                value="Volver a la Página Principal">
+        </div>
+
+    </div>
+</body>
+
+</html>
+
+
